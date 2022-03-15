@@ -1,16 +1,12 @@
 import Canvas from "./components/Canvas";
+import { decodeMessage, sendInitMsg, SOCKET_URL } from "./websocket";
+
+export const socket = new WebSocket(SOCKET_URL);
 
 function App() {
-  let socket = new WebSocket("ws://localhost:8080/ws");
+  socket.onopen = () => socket.send(sendInitMsg());
 
-  console.log("Attempting Websocket Connection");
-
-  socket.onopen = () => {
-    console.log("Successfully connected");
-    socket.send("Hi from the client");
-  };
-
-  socket.onmessage = (msg) => console.log(msg.data);
+  socket.onmessage = (response) => decodeMessage(response.data);
 
   socket.onclose = (event) => {
     console.log("Socket closed connection: ", event);
