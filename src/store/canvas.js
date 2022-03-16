@@ -1,19 +1,29 @@
 const { createSlice } = require("@reduxjs/toolkit");
 
 const initialState = {
-  player1X: 10,
-  player1Y: 20,
-  player1Height: 25,
-  player1Width: 20,
+  player1: {
+    x: 0,
+    y: 0,
+    height: 0,
+    width: 0,
+    score: 0,
+  },
 
-  player2X: 50,
-  player2Y: 50,
-  player2Height: 25,
-  player2Width: 20,
+  player2: {
+    x: 0,
+    y: 0,
+    height: 0,
+    width: 0,
+    score: 0,
+  },
 
-  ballRadius: 20,
-  ballX: 100,
-  ballY: 100,
+  ball: {
+    x: 0,
+    y: 0,
+    radius: 0,
+  },
+
+  context: null,
 };
 
 const canvasSlice = createSlice({
@@ -21,9 +31,15 @@ const canvasSlice = createSlice({
   initialState,
   reducers: {
     update(state, action) {
-      const { payload } = action;
+      const { ball, player1, player2 } = action.payload;
 
-      state.player1X = payload.p1x;
+      state.player1 = player1;
+      state.player2 = player2;
+      state.ball = ball;
+    },
+
+    saveContext(state, action) {
+      state.context = action.payload;
     },
   },
 });
