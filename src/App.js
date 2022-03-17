@@ -1,20 +1,22 @@
-import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
 import Canvas from "./components/Canvas";
-import { canvasActions } from "./store/canvas";
 
 import { SOCKET_URL } from "./util/socket";
 export const socket = new WebSocket(SOCKET_URL);
 
 function App() {
-  const dispatch = useDispatch();
+  const state = useSelector((state) => state.canvas);
+
+  const { player1, player2 } = state;
 
   socket.onopen = () => socket.send("INIT");
 
-  socket.onmessage = (response) => {
-    const game = JSON.parse(response.data);
-    console.log("Message received", game);
-    dispatch(canvasActions.update(game));
-  };
+  // socket.onmessage = (response) => {
+  //   const game = JSON.parse(response.data);
+  //   console.log("Message received", game);
+  //   dispatch(canvasActions.update(game));
+  // };
 
   socket.onclose = (event) => {
     console.log("Socket closed connection: ", event);
@@ -25,7 +27,6 @@ function App() {
   };
 
   const handleKeyDown = (e) => {
-    console.log(e.key + " Pressed!");
     if (e.key.toUpperCase() === "W") return socket.send("P1_UP_PRESS");
     if (e.key.toUpperCase() === "S") return socket.send("P1_DOWN_PRESS");
 
@@ -36,8 +37,6 @@ function App() {
   };
 
   const handleKeyUp = (e) => {
-    console.log(e.key + " Released!");
-
     if (e.key.toUpperCase() === "W") return socket.send("P1_UP_RELEASE");
     if (e.key.toUpperCase() === "S") return socket.send("P1_DOWN_RELEASE");
 
@@ -47,20 +46,32 @@ function App() {
       return socket.send("P2_DOWN_RELEASE");
   };
 
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+  }, []);
+
   return (
     <div
       className="App"
-      onKeyDown={handleKeyDown}
-      onKeyUp={handleKeyUp}
-      tabIndex="0"
+      // onKeyDown={handleKeyDown}
+      // onKeyUp={handleKeyUp}
+      // tabIndex="0"
     >
       <h1 style={{ textAlign: "center" }}>React Pong</h1>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-around",
+          alignItems: "center",
+        }}
+      >
+        <h5>{`Player 1: ${player1?.score || 0}`}</h5>
+        <h5>{`Player 2: ${player2?.score || 0}`}</h5>
+      </div>
 
-      <Canvas
-        width="600"
-        height="600"
-        style={{ background: "#f0f0f0", borderRadius: "5px" }}
-      />
+      <Canvas width="900" height="500" style={{ border: "2px solid white" }} />
     </div>
   );
 }

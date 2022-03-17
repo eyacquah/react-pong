@@ -1,59 +1,61 @@
 import { useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { socket } from "../App";
-
-const canvas = {
-  width: 600,
-  height: 600,
-};
+import { canvasActions } from "../store/canvas";
+import { draw } from "../util/draw";
 
 const Canvas = (props) => {
   const canvasRef = useRef(null);
-  const ctxRef = useRef(null);
-  const state = useSelector((state) => state.canvas);
-  const { player1, player2, ball } = state;
+  const requestIdRef = useRef(null);
+  const gameState = useRef(null);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (canvasRef.current) {
-      ctxRef.current = canvasRef.current.getContext("2d");
-    }
-  }, []);
+  const renderFrame = () => {
+    if (!gameState.current) return;
 
-  const draw = () => {
-    if (ctxRef.current === null) return;
+    const ctx = canvasRef.current.getContext("2d");
+    // console.log(ctx);
 
-    const ctx = ctxRef.current;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Get the latest game state
+    if (socket.readyState === 1) socket.send("UPDATE");
 
-    ctx.fillStyle = "purple";
-    // Left Paddle
-    ctx.fillRect(player1.x, player1.y, player1.width, player1.height);
-
-    // Right Paddle
-    ctx.fillRect(player2.x, player2.y, player2.width, player2.height);
-
-    //   Ball
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-
-    ctx.fill();
+    const { player1, player2, ball } = gameState.current;
+    draw(ctx, player1, player2, ball);
   };
 
   const FPS = 60;
 
-  const update = () => {
+  const tick = () => {
+    if (!canvasRef.current) return;
+
     setTimeout(() => {
-      requestAnimationFrame(update); // get next farme
-      draw();
-      if (socket.readyState === 1) socket.send("UPDATE");
+      renderFrame();
+      requestIdRef.current = requestAnimationFrame(tick);
     }, 1000 / FPS);
   };
 
   useEffect(() => {
-    update();
+    socket.onmessage = (response) => {
+      const game = JSON.parse(response.data);
+      dispatch(canvasActions.update(game));
+
+      gameState.current = game;
+    };
   }, []);
 
-  return <canvas ref={canvasRef} {...props} />;
+  useEffect(() => {
+    requestIdRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(requestIdRef.current);
+    };
+  }, []);
+
+  return (
+    <>
+      <canvas ref={canvasRef} {...props} />
+    </>
+  );
 };
 
 export default Canvas;
