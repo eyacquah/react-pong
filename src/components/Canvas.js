@@ -41,7 +41,7 @@ const Canvas = (props) => {
 
       gameState.current = game;
     };
-  }, []);
+  });
 
   useEffect(() => {
     requestIdRef.current = requestAnimationFrame(tick);
@@ -49,7 +49,7 @@ const Canvas = (props) => {
     return () => {
       cancelAnimationFrame(requestIdRef.current);
     };
-  }, []);
+  });
 
   return (
     <>
