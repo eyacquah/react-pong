@@ -9,7 +9,7 @@ const Canvas = (props) => {
   const requestIdRef = useRef(null);
   const gameState = useRef(null);
   const dispatch = useDispatch();
-  const FPS = 40;
+  const FPS = 60;
 
   useEffect(() => {
     socket.onmessage = (response) => {
