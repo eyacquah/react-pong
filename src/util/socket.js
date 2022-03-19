@@ -3,6 +3,8 @@ const SOCKET_URL =
     ? "ws://localhost:8080/ws"
     : "wss://go-pong-server.uc.r.appspot.com/ws";
 
+//ws:localhost:8080/ws
+
 export const socket = new WebSocket(SOCKET_URL);
 
 socket.onopen = () => socket.send("INIT");

@@ -33,7 +33,6 @@ function App() {
             width="900"
             height="500"
             style={{ border: "2px solid white" }}
-            changeScreen={onChangeScreen}
           />
           <GameActions changeScreen={onChangeScreen} />
         </>
